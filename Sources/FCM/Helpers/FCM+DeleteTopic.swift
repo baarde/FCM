@@ -11,9 +11,6 @@ extension FCM {
     }
 
     private func _deleteTopic(_ name: String, tokens: [String]) async throws {
-        guard let configuration = self.configuration else {
-            fatalError("FCM not configured. Use app.fcm.configuration = ...")
-        }
         guard let serverKey = configuration.serverKey else {
             fatalError("FCM: DeleteTopic: Server Key is missing.")
         }

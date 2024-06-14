@@ -4,10 +4,6 @@ import Vapor
 extension FCM {
 
     private func _send(_ message: FCMMessageDefault, tokens: [String]) async throws -> [String] {
-        guard let configuration = self.configuration else {
-            fatalError("FCM not configured. Use app.fcm.configuration = ...")
-        }
-
         let urlPath = URI(string: actionsBaseURL + configuration.projectId + "/messages:send").path
         
         let accessToken = try await getAccessToken()

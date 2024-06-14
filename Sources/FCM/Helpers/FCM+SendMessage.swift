@@ -7,9 +7,6 @@ extension FCM {
     }
     
     private func _send(_ message: FCMMessageDefault) async throws -> String {
-        guard let configuration = self.configuration else {
-            fatalError("FCM not configured. Use app.fcm.configuration = ...")
-        }
         var message = message
         
         if message.apns == nil,

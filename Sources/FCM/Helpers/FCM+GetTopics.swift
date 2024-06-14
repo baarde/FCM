@@ -3,9 +3,6 @@ import Vapor
 
 extension FCM {
     public func getTopics(token: String, on eventLoop: EventLoop) async throws -> [String] {
-        guard let configuration = self.configuration else {
-            fatalError("FCM not configured. Use app.fcm.configuration = ...")
-        }
         guard let serverKey = configuration.serverKey else {
             fatalError("FCM: GetTopics: Server Key is missing.")
         }

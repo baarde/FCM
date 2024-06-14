@@ -99,14 +99,6 @@ extension FCM {
             return []
         }
         
-        guard let configuration = self.configuration else {
-        #if DEBUG
-            fatalError("FCM not configured. Use app.fcm.configuration = ...")
-        #else
-            return []
-        #endif
-        }
-        
         guard let serverKey = serverKey ?? configuration.serverKey else {
             throw Abort(.internalServerError, reason: "FCM: Register APNS: Server Key is missing.")
         }
