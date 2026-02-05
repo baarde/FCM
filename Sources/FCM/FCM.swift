@@ -8,7 +8,7 @@ public class FCM: @unchecked Sendable {
     let client: Client
     let configuration: FCMConfiguration
 
-    var gAuth: GAuthPayload?
+    var gAuth: GAuthPayload
     var accessToken: String?
     var jwt: String?
 
@@ -37,24 +37,20 @@ public class FCM: @unchecked Sendable {
     public init(client: Client, configuration: FCMConfiguration) {
         self.client = client
         self.configuration = configuration
-        warmUpCache(with: configuration.email)
+        self.gAuth = GAuthPayload(iss: configuration.email, sub: configuration.email, scope: scope, aud: audience)
+        warmUpCache()
     }
 }
 
 // MARK: Cache
 
 extension FCM {
-    private func warmUpCache(with email: String) {
-        if gAuth == nil {
-            gAuth = GAuthPayload(iss: email, sub: email, scope: scope, aud: audience)
-        }
-        if jwt == nil {
-            Task {
-                do {
-                    jwt = try await generateJWT()
-                } catch {
-                    fatalError("FCM Unable to generate JWT: \(error)")
-                }
+    private func warmUpCache() {
+        Task {
+            do {
+                jwt = try await generateJWT()
+            } catch {
+                fatalError("FCM Unable to generate JWT: \(error)")
             }
         }
     }

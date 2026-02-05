@@ -3,9 +3,6 @@ import Vapor
 
 extension FCM {
     func getAccessToken() async throws -> String {
-        guard let gAuth = gAuth else {
-            fatalError("FCM gAuth can't be nil")
-        }
         if !gAuth.hasExpired, let token = accessToken {
             return token
         }
