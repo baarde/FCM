@@ -13,13 +13,13 @@ extension FCM {
     public struct Storage {
         private let application: Application
 
-        private var container: FCMClientContainer {
+        private var container: Container {
             guard let existingContainer = application.storage[ContainerKey.self] else {
                 let lock = application.locks.lock(for: ContainerKey.self)
                 lock.lock()
                 defer { lock.unlock() }
 
-                let new = FCMClientContainer(application: application)
+                let new = Container([:])
                 application.storage.set(ContainerKey.self, to: new)
                 return new
             }
@@ -32,17 +32,29 @@ extension FCM {
         }
 
         public func client(_ id: FCM.ID) -> FCM {
-            container.client(id)
+            container.withLockedValue { clients in
+                guard let client = clients[id] else {
+                    fatalError("No clients configured for \(id)")
+                }
+                return client
+            }
         }
-        
-        public func use(_ id: FCM.ID, configuration: FCMConfiguration) throws {
-            try container.use(id, configuration: configuration)
+
+        public func use(_ id: FCM.ID, configuration: FCMConfiguration) {
+            container.withLockedValue { clients in
+                guard !clients.keys.contains(id) else {
+                    fatalError("Cannot change fcm client config of \(id) while running.")
+                }
+                clients[id] = FCM(client: application.client, configuration: configuration)
+            }
         }
     }
 }
 
 extension FCM.Storage {
+    private typealias Container = NIOLockedValueBox<[FCM.ID: FCM]>
+
     private struct ContainerKey: StorageKey, LockKey {
-        typealias Value = FCMClientContainer
+        typealias Value = Container
     }
 }
