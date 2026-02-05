@@ -21,6 +21,7 @@ let package = Package(
             .product(name: "JWT", package: "jwt"),
         ]),
         .testTarget(name: "FCMTests", dependencies: [
+            .product(name: "VaporTesting", package: "vapor"),
             .target(name: "FCM"),
         ]),
     ]
