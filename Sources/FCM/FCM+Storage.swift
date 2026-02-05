@@ -14,17 +14,14 @@ extension FCM {
         private let application: Application
 
         private var container: Container {
-            guard let existingContainer = application.storage[ContainerKey.self] else {
-                let lock = application.locks.lock(for: ContainerKey.self)
-                lock.lock()
-                defer { lock.unlock() }
-
+            application.locks.lock(for: ContainerKey.self).withLock {
+                if let existing = application.storage[ContainerKey.self] {
+                    return existing
+                }
                 let new = Container([:])
                 application.storage.set(ContainerKey.self, to: new)
                 return new
             }
-
-            return existingContainer
         }
 
         init(application: Application) {
