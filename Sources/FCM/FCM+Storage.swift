@@ -45,6 +45,23 @@ extension FCM {
                 clients[id] = FCM(client: application.client, configuration: configuration)
             }
         }
+
+        public var configuration: FCMConfiguration? {
+            get {
+                container.withLockedValue { clients in
+                    clients[.default]?.configuration
+                }
+            }
+            nonmutating set {
+                container.withLockedValue { clients in
+                    if let newValue {
+                        clients[.default] = FCM(client: application.client, configuration: newValue)
+                    } else {
+                        clients[.default] = nil
+                    }
+                }
+            }
+        }
     }
 }
 
