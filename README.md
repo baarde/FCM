@@ -147,7 +147,7 @@ Next steps are optional
 ```swift
 /// The simplest way
 /// .env here means that FCM_SERVER_KEY and FCM_APP_BUNDLE_ID will be used
-let tokens = try await application.fcm.registerAPNS(.env, tokens: "token1", "token3", ..., "token100")
+let tokens = try await request.fcm.registerAPNS(.env, tokens: "token1", "token3", ..., "token100")
 /// `tokens` is array of `APNSToFirebaseToken` structs
 /// which contains:
 /// registration_token - Firebase token
@@ -160,7 +160,7 @@ extension RegisterAPNSID {
 }
 
 /// Advanced way
-let tokens = try await application.fcm.registerAPNS(
+let tokens = try await request.fcm.registerAPNS(
     appBundleId: String, // iOS app bundle identifier
     serverKey: String?, // optional server key, if nil then env variable will be used
     sandbox: Bool, // optional sandbox key, false by default
