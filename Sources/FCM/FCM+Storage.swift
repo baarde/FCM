@@ -31,7 +31,7 @@ extension FCM {
         public func client(_ id: FCM.ID) -> FCM {
             container.withLockedValue { clients in
                 guard let client = clients[id] else {
-                    fatalError("No clients configured for \(id)")
+                    fatalError("No FCM client configured for id '\(id.rawValue)'. Configure a client using app.fcm.use(id, configuration:) or set app.fcm.configuration for .default before making FCM requests.")
                 }
                 return client
             }
@@ -39,7 +39,7 @@ extension FCM {
 
         public func use(_ id: FCM.ID, configuration: FCMConfiguration) {
             container.withLockedValue { clients in
-                guard !clients.keys.contains(id) else {
+                guard clients[id] == nil else {
                     fatalError("Cannot change fcm client config of \(id) while running.")
                 }
                 clients[id] = FCM(client: application.client, configuration: configuration)
