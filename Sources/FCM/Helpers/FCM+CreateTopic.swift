@@ -19,15 +19,13 @@ extension FCM {
 //    }
 
     private func _createTopic(_ name: String? = nil, tokens: [String]) async throws -> String {
-        guard let serverKey = configuration.serverKey else {
-            fatalError("FCM: CreateTopic: Server Key is missing.")
-        }
         let url = self.iidURL + "batchAdd"
         let name = name ?? UUID().uuidString
         
-        let _ = try await getAccessToken()
+        let accessToken = try await getAccessToken()
         var headers = HTTPHeaders()
-        headers.add(name: .authorization, value: "key=\(serverKey)")
+        headers.bearerAuthorization = .init(token: accessToken)
+        headers.add(name: "access_token_auth", value: "true")
 
         let response = try await self.client.post(URI(string: url), headers: headers) { (req) in
             struct Payload: Content {

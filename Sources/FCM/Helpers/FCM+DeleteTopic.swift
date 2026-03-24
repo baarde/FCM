@@ -11,13 +11,10 @@ extension FCM {
     }
 
     private func _deleteTopic(_ name: String, tokens: [String]) async throws {
-        guard let serverKey = configuration.serverKey else {
-            fatalError("FCM: DeleteTopic: Server Key is missing.")
-        }
-        
-        let _ = try await getAccessToken()
+        let accessToken = try await getAccessToken()
         var headers = HTTPHeaders()
-        headers.add(name: .authorization, value: "key=\(serverKey)")
+        headers.bearerAuthorization = .init(token: accessToken)
+        headers.add(name: "access_token_auth", value: "true")
         
         let url = self.iidURL + "batchRemove"
         

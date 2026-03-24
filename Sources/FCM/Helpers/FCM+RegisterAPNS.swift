@@ -3,12 +3,10 @@ import Vapor
 
 public struct RegisterAPNSID {
     let appBundleId: String
-    let serverKey: String?
     let sandbox: Bool
 
-    public init (appBundleId: String, serverKey: String? = nil, sandbox: Bool = false) {
+    public init (appBundleId: String, sandbox: Bool = false) {
         self.appBundleId = appBundleId
-        self.serverKey = serverKey
         self.sandbox = sandbox
     }
 }
@@ -50,7 +48,7 @@ extension FCM {
         _ id: RegisterAPNSID,
         tokens: String...
     ) async throws -> [APNSToFirebaseToken] {
-        try await registerAPNS(appBundleId: id.appBundleId, serverKey: id.serverKey, sandbox: id.sandbox, tokens: tokens)
+        try await registerAPNS(appBundleId: id.appBundleId, sandbox: id.sandbox, tokens: tokens)
     }
 
     /// Helper method which registers your pure APNS token in Firebase Cloud Messaging
@@ -69,25 +67,23 @@ extension FCM {
         _ id: RegisterAPNSID,
         tokens: [String]
     ) async throws -> [APNSToFirebaseToken] {
-        try await registerAPNS(appBundleId: id.appBundleId, serverKey: id.serverKey, sandbox: id.sandbox, tokens: tokens)
+        try await registerAPNS(appBundleId: id.appBundleId, sandbox: id.sandbox, tokens: tokens)
     }
 
     /// Helper method which registers your pure APNS token in Firebase Cloud Messaging
     /// and returns firebase tokens for each APNS token
     public func registerAPNS(
         appBundleId: String,
-        serverKey: String? = nil,
         sandbox: Bool = false,
         tokens: String...
     ) async throws -> [APNSToFirebaseToken] {
-        try await registerAPNS(appBundleId: appBundleId, serverKey: serverKey, sandbox: sandbox, tokens: tokens)
+        try await registerAPNS(appBundleId: appBundleId, sandbox: sandbox, tokens: tokens)
     }
 
     /// Helper method which registers your pure APNS token in Firebase Cloud Messaging
     /// and returns firebase tokens for each APNS token
     public func registerAPNS(
         appBundleId: String,
-        serverKey: String? = nil,
         sandbox: Bool = false,
         tokens: [String]
     ) async throws -> [APNSToFirebaseToken] {
@@ -99,14 +95,12 @@ extension FCM {
             return []
         }
         
-        guard let serverKey = serverKey ?? configuration.serverKey else {
-            throw Abort(.internalServerError, reason: "FCM: Register APNS: Server Key is missing.")
-        }
-        
         let url = iidURL + "batchImport"
         
+        let accessToken = try await getAccessToken()
         var headers = HTTPHeaders()
-        headers.add(name: .authorization, value: "key=\(serverKey)")
+        headers.bearerAuthorization = .init(token: accessToken)
+        headers.add(name: "access_token_auth", value: "true")
         
         let response = try await self.client.post(URI(string: url), headers: headers) { req in
             struct Payload: Content {

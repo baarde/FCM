@@ -134,19 +134,13 @@ It is must have for developers who don't want to add Firebase libs into their ap
 
 ### Preparation
 
-1. Go to [Firebase Console](https://console.firebase.google.com/) -> Project Settings -> Cloud Messaging tab
-2. Copy `Server Key` from `Project Credentials` area
-
-Next steps are optional
-
-3. Put server key into environment variables as `FCM_SERVER_KEY=<YOUR_SERVER_KEY>` (or put it into `serviceAccountKey.json` file as `server_key`)
-4. Put your app bundle identifier into environment variables as `FCM_APP_BUNDLE_ID=<APP_BUNDLE_ID>`
+Put your app bundle identifier into environment variables as `FCM_APP_BUNDLE_ID=<APP_BUNDLE_ID>`.
 
 ### Tokens registration
 
 ```swift
 /// The simplest way
-/// .env here means that FCM_SERVER_KEY and FCM_APP_BUNDLE_ID will be used
+/// .env here means that FCM_APP_BUNDLE_ID will be used
 let tokens = try await request.fcm.registerAPNS(.env, tokens: "token1", "token3", ..., "token100")
 /// `tokens` is array of `APNSToFirebaseToken` structs
 /// which contains:
@@ -162,7 +156,6 @@ extension RegisterAPNSID {
 /// Advanced way
 let tokens = try await request.fcm.registerAPNS(
     appBundleId: String, // iOS app bundle identifier
-    serverKey: String?, // optional server key, if nil then env variable will be used
     sandbox: Bool, // optional sandbox key, false by default
     tokens: [String]
 )

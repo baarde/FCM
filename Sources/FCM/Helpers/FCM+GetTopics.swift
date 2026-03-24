@@ -3,14 +3,12 @@ import Vapor
 
 extension FCM {
     public func getTopics(token: String, on eventLoop: EventLoop) async throws -> [String] {
-        guard let serverKey = configuration.serverKey else {
-            fatalError("FCM: GetTopics: Server Key is missing.")
-        }
         let url = self.iidURL + "info/\(token)?details=true"
         
-        let _ = try await getAccessToken()
+        let accessToken = try await getAccessToken()
         var headers = HTTPHeaders()
-        headers.add(name: .authorization, value: "key=\(serverKey)")
+        headers.bearerAuthorization = .init(token: accessToken)
+        headers.add(name: "access_token_auth", value: "true")
 
         let response = try await self.client.get(URI(string: url), headers: headers)
         
