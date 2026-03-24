@@ -106,22 +106,22 @@ extension FCM {
             return eventLoop.future([])
             #endif
         }
-        guard let serverKey = serverKey ?? configuration.serverKey else {
-            fatalError("FCM: Register APNS: Server Key is missing.")
-        }
         let url = iidURL + "batchImport"
 
-        var headers = HTTPHeaders()
-        headers.add(name: .authorization, value: "key=\(serverKey)")
+        return getAccessToken().flatMap { accessToken in
+            var headers = HTTPHeaders()
+            headers.bearerAuthorization = .init(token: accessToken)
+            headers.add(name: "access_token_auth", value: "true")
 
-        return self.client.post(URI(string: url), headers: headers) { (req) in
-            struct Payload: Content {
-                let application: String
-                let sandbox: Bool
-                let apns_tokens: [String]
+            return self.client.post(URI(string: url), headers: headers) { (req) in
+                struct Payload: Content {
+                    let application: String
+                    let sandbox: Bool
+                    let apns_tokens: [String]
+                }
+                let payload = Payload(application: appBundleId, sandbox: sandbox, apns_tokens: tokens)
+                try req.content.encode(payload)
             }
-            let payload = Payload(application: appBundleId, sandbox: sandbox, apns_tokens: tokens)
-            try req.content.encode(payload)
         }
         .validate()
         .flatMapThrowing { res in

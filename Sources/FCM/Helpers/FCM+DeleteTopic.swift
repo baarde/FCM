@@ -22,13 +22,11 @@ extension FCM {
         guard let configuration = self.configuration else {
             fatalError("FCM not configured. Use app.fcm.configuration = ...")
         }
-        guard let serverKey = configuration.serverKey else {
-            fatalError("FCM: DeleteTopic: Server Key is missing.")
-        }
         let url = self.iidURL + "batchRemove"
         return getAccessToken().flatMap { accessToken -> EventLoopFuture<ClientResponse> in
             var headers = HTTPHeaders()
-            headers.add(name: .authorization, value: "key=\(serverKey)")
+            headers.bearerAuthorization = .init(token: accessToken)
+            headers.add(name: "access_token_auth", value: "true")
 
             return self.client.post(URI(string: url), headers: headers) { (req) in
                 struct Payload: Content {
